@@ -49,10 +49,10 @@ def get_spectrograms(audio):
     return Spectrograms(mag, mel, cqt, chroma, mfcc)
 
 
-def beat_synchronous_chroma(audio):
+def beat_synchronous_chroma(audio, semi_bins=3):
     """Return chroma_sync and beat_time"""
 
-    chroma = lr.feature.chroma_cqt(audio)
+    chroma = chroma_enchanced(audio, semi_bins)
     tempo, beat_freq = lr.beat.beat_track(audio, trim=False)
     beat_freq = lr.util.fix_frames(beat_freq, x_max=chroma.shape[1])
     chroma_sync = lr.util.sync(chroma, beat_freq, aggregate=np.median)
@@ -60,22 +60,29 @@ def beat_synchronous_chroma(audio):
     return chroma_sync, beat_time
 
 
-def beat_synchronous_chroma_enhanced(audio, semi_bins=3):
-    """Return chroma_sync and beat_time"""
+def chroma_enchanced(audio, semi_bins=3):
+    """Return smoothed chroma"""
 
-    harm = lr.effects.harmonic(audio)
-    chroma_oversample = lr.feature.chroma_cqt(harm, bins_per_octave=12*semi_bins)
+    harmonic = lr.effects.harmonic(audio)
+    chroma_oversample = lr.feature.chroma_cqt(harmonic, bins_per_octave=12*semi_bins)
     chroma_filter = np.minimum(chroma_oversample,
                                lr.decompose.nn_filter(chroma_oversample,
                                                       aggregate=np.median,
                                                       metric='cosine'))
     chroma_smooth = sp.ndimage.median_filter(chroma_filter, size=(1, 9))
+    return chroma_smooth
 
-    tempo, beat_freq = lr.beat.beat_track(audio, trim=False)
-    beat_freq = lr.util.fix_frames(beat_freq, x_max=chroma_smooth.shape[1])
-    chroma_sync = lr.util.sync(chroma_smooth, beat_freq, aggregate=np.median)
-    beat_time = lr.frames_to_time(beat_freq)
-    return chroma_sync, beat_time
+
+def label_formatter(axis):
+    """Formats the labels of axis"""
+
+    axis.xaxis.set_visible(False)
+    axis.yaxis.set_visible(False)
+
+    if axis.is_first_col():
+        axis.yaxis.set_visible(True)
+    if axis.is_last_row():
+        axis.xaxis.set_visible(True)
 
 
 def get_aggregations(spectrogram, axis=None):
