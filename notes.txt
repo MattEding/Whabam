@@ -1,0 +1,6 @@
+Led Zepplin vs Greta Van Fleet
+- if it confuses GVF as LZ can use model as a predictor for finding similar artists
+
+Do I do a train-test-split separating out all parts of any given song into a single category?
+Kinda like how InstaCart example separated out unique users.
+
