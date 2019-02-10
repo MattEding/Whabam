@@ -13,7 +13,7 @@ directory = Path.cwd() / 'tracks'
 def get_audio_tracks():
     """Return paths to all the audio tracks."""
 
-    return sorted(directory.iterdir())
+    return sorted(track for track in directory.iterdir() if get_duration(track) >= 30)
 
 
 def find_file(query, path=directory):
@@ -35,6 +35,16 @@ def get_duration(file):
     output = popen.stdout.read()
     duration = output.split()[1].split(b'=')[1]
     return float(duration)
+
+
+def load_audio_segments(file, sec=30):
+    """Return audio_segments list (without sr) and track name from file of duration sec"""
+
+    duration = get_duration(file)
+    segments = int(duration) // sec
+    audio_segments = [lr.load(file, offset=sec*i, duration=sec)[0] for i in range(segments)]
+    name = file.stem.split('-')[-1].replace('_', ' ').title()
+    return audio_segments, name
 
 
 def get_spectrograms(audio):

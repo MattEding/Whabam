@@ -1,36 +1,28 @@
+from collections import ChainMap
+
 import librosa as lr
 import numpy as np
 
-import utilty
-
-
-def load_audio_segments(file, sec=30):
-    """Return audio_segments list and track name from file of duration sec"""
-
-    duration = utilty.get_duration(file)
-    segments = int(duration) // sec
-    audio_segments = [lr.load(file, offset=sec*i, duration=sec) for i in range(segments)]
-    name = file.stem.split('-')[-1].replace('_', ' ').title()
-    return audio_segments, name
+import utility
 
 
 def chroma_aggs(audio_segment):
     """Return dict of chroma_aggs from audio_segment"""
 
-    chroma, _ = utilty.beat_synchronous_chroma(audio_segment)
-    chroma_aggs = utilty.get_aggregations(chroma, axis=1)
-    chroma_aggs = [utilty.Aggregations(*row) for row in np.array(chroma_aggs).T]
-    chroma_ids = 'C Db D Eb E F Gb G Ab A Bb B'.split()
-    return {id: agg for id, agg in zip(chroma_ids, chroma_aggs)}
-    # return chroma_aggs
+    chroma, _ = utility.beat_synchronous_chroma(audio_segment)
+    chroma_aggs = utility.get_aggregations(chroma, axis=1)
+    chroma_aggs = [utility.Aggregations(*row) for row in np.array(chroma_aggs).T]
+    # chroma_ids = 'C Db D Eb E F Gb G Ab A Bb B'.split()
+    chroma_ids = range(12)
+    return {f'pitch_{id}': agg for id, agg in zip(chroma_ids, chroma_aggs)}
 
 
 def bound_width_aggs(chroma, k=20):
-    """Return dict of bound_width_aggs where k is the number of segments to decompose chroma."""
+    """Return dict of bound_width_aggs where k is the number of segments to decompose chroma"""
 
     bound = lr.segment.agglomerative(chroma, k)
     bound_widths = np.diff(bound)
-    bound_width_aggs = utilty.get_aggregations(bound_widths, axis=0)
+    bound_width_aggs = utility.get_aggregations(bound_widths, axis=0)
     return {'bound_width': bound_width_aggs}
 
 
@@ -39,9 +31,9 @@ def bound_width_aggs(chroma, k=20):
 def tempo_aggs(audio_segment):
     """Return dict of tempogram_aggs, dynamic_tempo_aggs, and tempo from audio_segment"""
 
-    tempogram, dynamic_tempo, tempo= utilty.dynamic_tempo_estimation(audio_segment)
-    tempogram_aggs = utilty.get_aggregations(tempogram, axis=1)
-    dynamic_tempo_aggs = utilty.get_aggregations(dynamic_tempo)
+    tempogram, dynamic_tempo, tempo= utility.dynamic_tempo_estimation(audio_segment)
+    tempogram_aggs = utility.get_aggregations(tempogram, axis=1)
+    dynamic_tempo_aggs = utility.get_aggregations(dynamic_tempo)
     tempos = np.asscalar(tempo)
     return {'tempogram': tempogram_aggs, 'dynamic_tempo': dynamic_tempo_aggs, 'tempo': tempo}
 
@@ -50,18 +42,29 @@ def tonnetz_aggs(audio_segment):
     """Return dict of tonnetz_aggs from audio_segment"""
 
     tonnetz = lr.feature.tonnetz(audio_segment)
-    tonnetz_aggs = utilty.get_aggregations(tonnetz, axis=1)
-    tonnetz_aggs = [utilty.Aggregations(*row) for row in np.array(tonnetz_aggs).T]
-    tonnetz_ids = 'x_P5 y_P5 x_m3 y_m3 x_M3 y_M3'.split()
+    tonnetz_aggs = utility.get_aggregations(tonnetz, axis=1)
+    tonnetz_aggs = [utility.Aggregations(*row) for row in np.array(tonnetz_aggs).T]
+    tonnetz_ids = 'x_perf5 y_perf5 x_min3 y_min3 x_maj3 y_maj3'.split()
     return {id: agg for id, agg in zip(tonnetz_ids, tonnetz_aggs)}
 
 
 def misc_feature_aggs(audio_segment):
-    """Return dict of all features from lr.feature with shape (1, t)"""
-    
+    """Return dict of all features from lr.feature with shape (1, t) from audio_segment"""
+
     feature_funcs = [lr.feature.rmse, lr.feature.spectral_bandwidth,
                      lr.feature.spectral_centroid, lr.feature.spectral_flatness,
                      lr.feature.spectral_rolloff, lr.feature.zero_crossing_rate]
 
-    return {feat.__name__: utilty.get_aggregations(feat(audio_segment))
+    return {feat.__name__: utility.get_aggregations(feat(audio_segment))
             for feat in feature_funcs}
+
+
+def extract_all(audio_segment):
+    """Return ChainMap of all features from audio_segment"""
+
+    chroma_dct = chroma_aggs(audio_segment)
+    bound_width_dct = bound_width_aggs(audio_segment)
+    tempo_dct = tempo_aggs(audio_segment)
+    tonnetz_dct = tonnetz_aggs(audio_segment)
+    misc_feature_dct = misc_feature_aggs(audio_segment)
+    return ChainMap(chroma_dct, bound_width_dct, tempo_dct, tonnetz_dct, misc_feature_dct)
