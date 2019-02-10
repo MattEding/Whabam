@@ -1,10 +1,10 @@
 from collections import namedtuple
+# from functools import partial
 from pathlib import Path
 import subprocess
 
 import librosa as lr
 import numpy as np
-import pandas as pd
 import scipy as sp
 
 
@@ -12,6 +12,7 @@ directory = Path.cwd() / 'tracks'
 
 def get_audio_tracks():
     """Return paths to all the audio tracks."""
+
     return sorted(directory.iterdir())
 
 
@@ -85,12 +86,30 @@ def label_formatter(axis):
         axis.xaxis.set_visible(True)
 
 
-def get_aggregations(spectrogram, axis=None):
-    """Return namedtuple Aggreations with mean, median, mode, max, min, std, sum"""
+def mode(a, axis=0):
+    """Return the mode of an array"""
 
-    Aggregations = namedtuple('Aggregations', 'mean median mode max min std sum')
-    aggs = (np.mean, np.median, sp.stats.mode, np.max, np.min, np.std, np.sum)
-    return Aggregations(*[agg(spectrogram, axis=axis) for agg in aggs])
+    return sp.stats.mode(a, axis=axis)[0].T[0]
+
+# def count(a, axis=0):
+#     return sp.stats.mode(a, axis=axis)[1]
+
+# _float_bits = np.float32
+# _aggs = [np.mean, np.median, mode, np.max, np.min, np.std, np.sum, np.prod]
+# _dtype = [(agg.__name__, _float_bits) for agg in _aggs]
+# agg_arr = partial(np.array, dtype=_dtype)
+# def aggregate(arr, axis=None):
+#     return agg_arr([tuple(agg(arr) for agg in _aggs)])
+
+
+# Note: np.max is alias for np.amax
+_aggs = [np.mean, np.median, mode, np.amax, np.amin, np.std, np.sum, np.prod]
+Aggregations = namedtuple('Aggregations', [agg.__name__ for agg in _aggs])
+
+def get_aggregations(arr, axis=None):
+    """Return namedtuple Aggreations with mean, median, mode, amax, amin, std, sum, prod"""
+
+    return Aggregations(*[agg(arr, axis=axis) for agg in _aggs])
 
 
 def dynamic_tempo_estimation(audio):
