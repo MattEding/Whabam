@@ -32,7 +32,7 @@ def tempo_aggs(audio_segment):
     """Return dict of tempogram_aggs, dynamic_tempo_aggs, and tempo from audio_segment"""
 
     tempogram, dynamic_tempo, tempo= utility.dynamic_tempo_estimation(audio_segment)
-    tempogram_aggs = utility.get_aggregations(tempogram, axis=1)
+    tempogram_aggs = utility.get_aggregations(tempogram)#, axis=1
     dynamic_tempo_aggs = utility.get_aggregations(dynamic_tempo)
     tempos = np.asscalar(tempo)
     return {'tempogram': tempogram_aggs, 'dynamic_tempo': dynamic_tempo_aggs, 'tempo': tempo}
@@ -67,4 +67,5 @@ def extract_all(audio_segment):
     tempo_dct = tempo_aggs(audio_segment)
     tonnetz_dct = tonnetz_aggs(audio_segment)
     misc_feature_dct = misc_feature_aggs(audio_segment)
-    return ChainMap(chroma_dct, bound_width_dct, tempo_dct, tonnetz_dct, misc_feature_dct)
+    # tempo_dct in first map to allow pop of tempo key
+    return ChainMap(tempo_dct, chroma_dct, bound_width_dct, tonnetz_dct, misc_feature_dct)
