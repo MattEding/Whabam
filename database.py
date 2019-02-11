@@ -40,6 +40,14 @@ def reset_tables(*, dbname='audio', host='localhost', port=5432):
 def drop_tables(*, dbname='audio', host='localhost', port=5432):
     """Drop all tables in database"""
 
+    inpt = ''
+    while inpt not in 'ny':
+        inpt = input('drop tables? y/n')
+
+    if inpt != 'y':
+        raise KeyboardInterrupt
+        return
+
     connection = connect_db(dbname=dbname, host=host, port=port)
     cursor = connection.cursor()
 

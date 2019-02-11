@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>Analyze</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+  <h1>{{ name }}</h1>
+  <img src="{{ chroma_path }}", alt="Chroma">
+  <img src="{{ tempo_path }}", alt="Tempo">
+
+  <br>
+
+  <audio controls>
+    <source src="{{ audio_path }}" type="audio/wav">
+  </audio>
+
+</body>
+
+</html>
