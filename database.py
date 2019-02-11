@@ -19,7 +19,7 @@ def map_float_sql(flt):
         return "'+infinity'"
     if np.isneginf(flt):
         return "'-infinity'"
-    return x
+    return flt
 
 
 def connect_db(*, dbname='audio', host='localhost', port=5432):
@@ -31,7 +31,7 @@ def connect_db(*, dbname='audio', host='localhost', port=5432):
 
 
 def reset_tables(*, dbname='audio', host='localhost', port=5432):
-    """Reset all tables in database""""
+    """Reset all tables in database"""
 
     drop_tables(dbname=dbname, host=host, port=port)
     create_tables(dbname=dbname, host=host, port=port)
@@ -39,11 +39,11 @@ def reset_tables(*, dbname='audio', host='localhost', port=5432):
 
 def drop_tables(*, dbname='audio', host='localhost', port=5432):
     """Drop all tables in database"""
-    
+
     connection = connect_db(dbname=dbname, host=host, port=port)
     cursor = connection.cursor()
 
-    for table in TABLES:
+    for table in TABLES + ['tempo']:
         query = f"DROP TABLE {table}"
         cursor.execute(query)
 

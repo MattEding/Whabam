@@ -51,12 +51,18 @@ def tonnetz_aggs(audio_segment):
 def misc_feature_aggs(audio_segment):
     """Return dict of all features from lr.feature with shape (1, t) from audio_segment"""
 
-    feature_funcs = [lr.feature.rmse, lr.feature.spectral_bandwidth,
-                     lr.feature.spectral_centroid, lr.feature.spectral_flatness,
-                     lr.feature.spectral_rolloff, lr.feature.zero_crossing_rate]
+    magnitude = abs(lr.stft(audio_segment))
 
-    return {feat.__name__: utility.get_aggregations(feat(audio_segment))
-            for feat in feature_funcs}
+    feature_funcs_y = [lr.feature.rmse, lr.feature.zero_crossing_rate]
+    feature_funcs_S = [lr.feature.spectral_bandwidth, lr.feature.spectral_centroid,
+                       lr.feature.spectral_flatness, lr.feature.spectral_rolloff]
+
+    features_y = {feat.__name__: utility.get_aggregations(feat(y=audio_segment))
+                  for feat in feature_funcs_y}
+    features_S = {feat.__name__: utility.get_aggregations(feat(S=magnitude))
+                  for feat in feature_funcs_S}
+
+    return {**features_y, **features_S}
 
 
 def extract_all(audio_segment):
