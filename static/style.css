@@ -12,10 +12,3 @@ html{
 img{
   background: lightgrey;
 }
-
-audio{
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  text-align: center;
-}
