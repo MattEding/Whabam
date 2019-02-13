@@ -4,7 +4,7 @@ __Investigation__:
 Can a music artist be identified by a 30 second song segment using machine learning?
 
 __Tools__:  
-See requirements.txt for python libraries used. Also requires SQL database,
+See [requirements.txt](https://github.com/MattEding/Whabam/blob/master/requirements.txt) for python libraries used. Also requires SQL database,
 [ffmpeg](https://www.ffmpeg.org/) audio codec, and two music artist discographies to analyze.  
 
 __Implementation__:  
