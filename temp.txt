@@ -1,6 +1,0 @@
-pitch_1.mean AS p1_mean,
-    pitch_1.mode AS p1_mode,
-    pitch_1.median AS p1_median,
-    pitch_1.amax AS p1_max,
-    pitch_1.amin AS p1_min,
-    pitch_1.std AS p1_std,
