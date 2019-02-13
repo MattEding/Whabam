@@ -26,13 +26,11 @@ def bound_width_aggs(chroma, k=20):
     return {'bound_width': bound_width_aggs}
 
 
-# TODO: do I want to do Aggreations(tempo) just for consistency?
-# Actually just to dict.pop('tempo') before doing stuff with aggs
 def tempo_aggs(audio_segment):
     """Return dict of tempogram_aggs, dynamic_tempo_aggs, and tempo from audio_segment"""
 
     tempogram, dynamic_tempo, tempo= utility.dynamic_tempo_estimation(audio_segment)
-    tempogram_aggs = utility.get_aggregations(tempogram)#, axis=1
+    tempogram_aggs = utility.get_aggregations(tempogram)
     dynamic_tempo_aggs = utility.get_aggregations(dynamic_tempo)
     tempos = np.asscalar(tempo)
     return {'tempogram': tempogram_aggs, 'dynamic_tempo': dynamic_tempo_aggs, 'tempo': tempo}

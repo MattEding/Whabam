@@ -1,5 +1,4 @@
 from collections import namedtuple
-# from functools import partial
 from pathlib import Path
 import subprocess
 
@@ -100,16 +99,6 @@ def mode(a, axis=0):
     """Return the mode of an array"""
 
     return sp.stats.mode(a, axis=axis)[0].T[0]
-
-# def count(a, axis=0):
-#     return sp.stats.mode(a, axis=axis)[1]
-
-# _float_bits = np.float32
-# _aggs = [np.mean, np.median, mode, np.max, np.min, np.std, np.sum, np.prod]
-# _dtype = [(agg.__name__, _float_bits) for agg in _aggs]
-# agg_arr = partial(np.array, dtype=_dtype)
-# def aggregate(arr, axis=None):
-#     return agg_arr([tuple(agg(arr) for agg in _aggs)])
 
 
 # Note: np.max is alias for np.amax

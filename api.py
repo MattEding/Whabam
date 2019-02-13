@@ -5,6 +5,7 @@ import librosa as lr
 import librosa.display
 import matplotlib.pyplot as plt
 import numpy as np
+import flask
 
 from utility import beat_synchronous_chroma, dynamic_tempo_estimation
 
@@ -12,7 +13,6 @@ from utility import beat_synchronous_chroma, dynamic_tempo_estimation
 def _format_name(name):
     name = "".join(char for char in name.lower() if char not in punctuation)
     name = name.replace(' ', '_')
-    print(name)
     return name
 
 
@@ -23,7 +23,8 @@ def save_plot_chroma(audio, name):
     path = f'static/images/chroma_{path_name}.png'
 
     if not Path(path).exists():
-        fig = plt.figure()   # Need figure, otherwise with flask matplotlib will save on top of old plots
+        #: Need figure, otherwise with flask matplotlib will save on top of old plots
+        fig = plt.figure()
         ax = fig.add_subplot(1,1,1)
         chroma_sync, beat_time = beat_synchronous_chroma(audio)
         lr.display.specshow(chroma_sync, x_coords=beat_time, x_axis='time', y_axis='chroma', ax=ax)
@@ -32,7 +33,7 @@ def save_plot_chroma(audio, name):
         fig.savefig(path, transparent=True, bbox_inches='tight')
 
     path = f'images/chroma_{path_name}.png'
-    return path
+    return flask.url_for('static', filename=path)
 
 
 def save_plot_tempo(audio, name):
@@ -55,7 +56,7 @@ def save_plot_tempo(audio, name):
         fig.savefig(path, transparent=True, bbox_inches='tight')
 
     path = f'images/tempo_{path_name}.png'
-    return path
+    return flask.url_for('static', filename=path)
 
 
 def save_segment(audio, name):
@@ -67,6 +68,6 @@ def save_segment(audio, name):
     if not Path(path).exists():
         lr.output.write_wav(path, audio, sr=22050)
 
-    # oddly this will not play in Firefox. Works in Safari
+    #: Oddly this will not play in Firefox. Works in Safari and Chrome
     path = f'waves/segment_{path_name}.wav'
-    return path
+    return flask.url_for('static', filename=path)
